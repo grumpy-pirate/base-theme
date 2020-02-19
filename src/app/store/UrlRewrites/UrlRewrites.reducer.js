@@ -22,10 +22,14 @@ const UrlRewritesReducer = (state = initialState, action) => {
     switch (action.type) {
     case UPDATE_URL_REWRITE:
         const { urlRewrite } = action;
+        const { urlRewrite: { urlParam: url_param } } = state;
 
         return {
             ...state,
-            urlRewrite
+            urlRewrite: {
+                url_param,
+                ...urlRewrite
+            }
         };
     case CLEAR_URL_REWRITE:
         return {

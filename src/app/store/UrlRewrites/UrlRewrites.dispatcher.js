@@ -38,7 +38,8 @@ export class UrlRewritesDispatcher extends QueryDispatcher {
      * @return {Query} UrlRewrite query
      * @memberof UrlRewritesDispatcher
      */
-    prepareRequest(options) {
+    prepareRequest(options, dispatch) {
+        dispatch(updateUrlRewrite(options));
         return [UrlRewritesQuery.getQuery(options)];
     }
 

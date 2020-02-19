@@ -86,13 +86,15 @@ export class CategoryPageContainer extends PureComponent {
         isInfoLoading: PropTypes.bool.isRequired,
         categoryIds: PropTypes.number,
         isOnlyPlaceholder: PropTypes.bool,
-        isSearchPage: PropTypes.bool
+        isSearchPage: PropTypes.bool,
+        urlParam: PropTypes.string
     };
 
     static defaultProps = {
         categoryIds: 0,
         isOnlyPlaceholder: false,
-        isSearchPage: false
+        isSearchPage: false,
+        urlParam: ''
     };
 
     config = {
@@ -195,12 +197,16 @@ export class CategoryPageContainer extends PureComponent {
     }
 
     _updateData(prevProps) {
-        const { categoryIds, location: { search } } = this.props;
+        const { categoryIds, location: { search }, urlParam } = this.props;
         const { categoryIds: prevCategoryIds, location: { search: prevSearch } } = prevProps;
 
         // ComponentDidUpdate fires multiple times, to prevent getting same data we check that url has changed
         // getIsNewCategory prevents getting Category data, when sort or filter options have changed
-        if (this._urlHasChanged(location, prevProps) && this.getIsNewCategory()) {
+        if (
+            (!urlParam && !categoryIds) // this is URL rewrite
+            && this._urlHasChanged(location, prevProps) // the URL has changed
+            && this.getIsNewCategory() // the category is new
+        ) {
             this._requestCategoryWithPageList();
             return;
         }

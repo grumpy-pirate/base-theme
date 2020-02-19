@@ -17,6 +17,7 @@ import CmsPage from 'Route/CmsPage';
 import NoMatch from 'Route/NoMatch';
 import { getUrlParam } from 'Util/Url';
 import { LocationType, MatchType } from 'Type/Common';
+import { CategoryTreeType } from 'Type/Category';
 
 export const TYPE_PRODUCT = 'PRODUCT';
 export const TYPE_CMS_PAGE = 'CMS_PAGE';
@@ -34,7 +35,8 @@ export default class UrlRewrites extends PureComponent {
         match: MatchType.isRequired,
         clearUrlRewrites: PropTypes.func.isRequired,
         requestUrlRewrite: PropTypes.func.isRequired,
-        urlRewrite: PropTypes.shape({}).isRequired
+        urlRewrite: PropTypes.shape({}).isRequired,
+        category: CategoryTreeType.isRequired
     };
 
     state = {
@@ -96,7 +98,34 @@ export default class UrlRewrites extends PureComponent {
         return <main />;
     }
 
-    renderPage({ type, id, url_key }) {
+    renderCategory() {
+        const { props } = this;
+        const {
+            match,
+            location,
+            requestUrlRewrite,
+            urlRewrite: { url_param: prevUrlParam, id },
+            category: { id: catId, url_path } = {}
+        } = props;
+
+        const urlParam = getUrlParam(match, location);
+
+        // if there was a previuosly loaded category by url reqrite that doesnt match current path
+        // we re-ask for url rewrite
+        if (urlParam !== prevUrlParam && (id !== catId || urlParam !== url_path)) {
+            requestUrlRewrite({ urlParam });
+        }
+
+        return (
+            <CategoryPage
+              { ...props }
+              categoryIds={ id }
+              urlParam={ prevUrlParam }
+            />
+        );
+    }
+
+    renderPage({ type, url_key }) {
         const { props } = this;
 
         switch (type) {
@@ -114,7 +143,7 @@ export default class UrlRewrites extends PureComponent {
         case TYPE_CMS_PAGE:
             return <CmsPage { ...props } urlKey={ url_key } />;
         case TYPE_CATEGORY:
-            return <CategoryPage { ...props } categoryIds={ id } />;
+            return this.renderCategory();
         case TYPE_NOTFOUND:
             return <NoMatch { ...props } />;
         default:
